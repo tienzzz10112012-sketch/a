@@ -116,21 +116,29 @@
   <!-- App Header -->
   <header class="sticky top-0 z-30 bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-800/80 px-4 py-3 flex items-center justify-between">
     <div class="flex items-center space-x-2.5">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
+      <!-- Globe Language Switcher Button (Top Left) -->
+      <button id="lang-toggle" class="w-9 h-9 rounded-xl bg-slate-800 text-indigo-400 border border-slate-700/60 flex items-center justify-center hover:bg-slate-700 transition active:scale-95 shrink-0" title="Đổi ngôn ngữ / Change Language">
+        <i class="fa-solid fa-globe text-base"></i>
+      </button>
+
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 shrink-0">
         <i class="fa-solid fa-dice-d20 text-lg"></i>
       </div>
       <div>
         <h1 class="font-display font-extrabold text-base tracking-tight bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
           QuickDecision
         </h1>
-        <p class="text-[10px] text-slate-400 font-medium -mt-1">Mobile Studio</p>
+        <p id="app-subtitle-text" class="text-[10px] text-slate-400 font-medium -mt-1">Studio Di Động</p>
       </div>
     </div>
 
     <!-- Header Actions -->
     <div class="flex items-center space-x-2">
-      <!-- Sound Toggle visual feedback indicator -->
-      <button id="sound-toggle" class="w-9 h-9 rounded-xl bg-slate-800 text-slate-300 border border-slate-700/60 flex items-center justify-center hover:bg-slate-700 transition active:scale-95" title="Toggle Sound Visuals">
+      <!-- Language Tag Display -->
+      <span id="lang-code-badge" class="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-mono text-[10px] font-bold uppercase">VI</span>
+
+      <!-- Sound Toggle -->
+      <button id="sound-toggle" class="w-9 h-9 rounded-xl bg-slate-800 text-slate-300 border border-slate-700/60 flex items-center justify-center hover:bg-slate-700 transition active:scale-95" title="Bật/Tắt hiệu ứng">
         <i id="sound-icon" class="fa-solid fa-volume-high text-xs text-indigo-400"></i>
       </button>
 
@@ -152,8 +160,8 @@
     <!-- ==================== 1. WHEEL OF FORTUNE MODE ==================== -->
     <section id="view-wheel" class="view-section w-full max-w-sm flex flex-col items-center justify-center space-y-6">
       <div class="text-center space-y-1">
-        <span class="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-wider">Wheel of Fortune</span>
-        <h2 class="text-xl font-display font-bold text-slate-100">Spin to Decide</h2>
+        <span data-i18n="wheelBadge" class="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-wider">Vòng Quay May Mắn</span>
+        <h2 data-i18n="wheelTitle" class="text-xl font-display font-bold text-slate-100">Quay Để Quyết Định</h2>
       </div>
 
       <!-- Wheel Container -->
@@ -167,8 +175,8 @@
         <canvas id="wheel-canvas" width="320" height="320" class="w-full h-full rounded-full shadow-2xl border-4 border-slate-800/80 transition-transform"></canvas>
 
         <!-- Center Spin Button -->
-        <button id="spin-btn" class="absolute z-10 w-16 h-16 rounded-full bg-slate-900 text-white font-display font-extrabold text-sm border-4 border-indigo-500 shadow-xl shadow-indigo-500/40 flex items-center justify-center hover:scale-105 active:scale-95 transition">
-          SPIN
+        <button id="spin-btn" data-i18n="spinBtn" class="absolute z-10 w-16 h-16 rounded-full bg-slate-900 text-white font-display font-extrabold text-sm border-4 border-indigo-500 shadow-xl shadow-indigo-500/40 flex items-center justify-center hover:scale-105 active:scale-95 transition">
+          QUAY
         </button>
       </div>
 
@@ -176,10 +184,10 @@
       <div class="w-full bg-slate-800/60 border border-slate-700/60 rounded-2xl p-3 flex items-center justify-between">
         <div class="flex items-center space-x-2.5 overflow-hidden">
           <i class="fa-solid fa-tag text-indigo-400 text-sm"></i>
-          <span id="active-list-name" class="text-xs font-semibold text-slate-200 truncate">Default List</span>
+          <span id="active-list-name" class="text-xs font-semibold text-slate-200 truncate">Danh sách tùy chỉnh</span>
         </div>
         <button id="quick-edit-btn" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium shrink-0 flex items-center gap-1">
-          <i class="fa-solid fa-pen text-[10px]"></i> Edit Items
+          <i class="fa-solid fa-pen text-[10px]"></i> <span data-i18n="editItems">Chỉnh sửa</span>
         </button>
       </div>
     </section>
@@ -187,8 +195,8 @@
     <!-- ==================== 2. COIN FLIPPER 3D MODE ==================== -->
     <section id="view-coin" class="view-section hidden w-full max-w-sm flex flex-col items-center justify-center space-y-8">
       <div class="text-center space-y-1">
-        <span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">3D Coin Flip</span>
-        <h2 class="text-xl font-display font-bold text-slate-100">Heads or Tails?</h2>
+        <span data-i18n="coinBadge" class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">Tung Đồng Xu 3D</span>
+        <h2 data-i18n="coinTitle" class="text-xl font-display font-bold text-slate-100">Mặt Ngửa hay Mặt Sấp?</h2>
       </div>
 
       <!-- 3D Coin Object -->
@@ -199,7 +207,7 @@
           <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-200 border-4 border-amber-300 shadow-2xl flex flex-col items-center justify-center text-amber-950 backface-hidden">
             <div class="w-36 h-36 rounded-full border-2 border-dashed border-amber-700/40 flex flex-col items-center justify-center p-2 text-center">
               <i class="fa-solid fa-crown text-4xl mb-1 text-amber-900"></i>
-              <span class="font-display font-black text-xl tracking-wider uppercase">HEADS</span>
+              <span id="coin-heads-label" data-i18n="coinHeads" class="font-display font-black text-xl tracking-wider uppercase">NGỬA</span>
             </div>
           </div>
 
@@ -207,7 +215,7 @@
           <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-slate-400 via-slate-300 to-slate-100 border-4 border-slate-200 shadow-2xl flex flex-col items-center justify-center text-slate-800 backface-hidden rotate-y-180">
             <div class="w-36 h-36 rounded-full border-2 border-dashed border-slate-400/60 flex flex-col items-center justify-center p-2 text-center">
               <i class="fa-solid fa-shield-halved text-4xl mb-1 text-slate-700"></i>
-              <span class="font-display font-black text-xl tracking-wider uppercase">TAILS</span>
+              <span id="coin-tails-label" data-i18n="coinTails" class="font-display font-black text-xl tracking-wider uppercase">SẤP</span>
             </div>
           </div>
 
@@ -216,15 +224,15 @@
 
       <button id="flip-coin-btn" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-display font-bold text-base shadow-lg shadow-emerald-500/25 active:scale-95 transition flex items-center justify-center gap-2">
         <i class="fa-solid fa-hand-pointer"></i>
-        <span>Tap to Flip Coin</span>
+        <span data-i18n="flipCoinBtn">Chạm để tung đồng xu</span>
       </button>
     </section>
 
     <!-- ==================== 3. MYSTERY CARDS MODE ==================== -->
     <section id="view-cards" class="view-section hidden w-full max-w-sm flex flex-col items-center justify-center space-y-6">
       <div class="text-center space-y-1">
-        <span class="px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold uppercase tracking-wider">Blind Box Cards</span>
-        <h2 class="text-xl font-display font-bold text-slate-100">Pick Your Destiny</h2>
+        <span data-i18n="cardsBadge" class="px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold uppercase tracking-wider">Hộp Quà Bí Ẩn</span>
+        <h2 data-i18n="cardsTitle" class="text-xl font-display font-bold text-slate-100">Rút Thẻ May Mắn</h2>
       </div>
 
       <!-- Grid of Cards -->
@@ -234,15 +242,15 @@
 
       <button id="reset-cards-btn" class="w-full py-3 rounded-2xl bg-slate-800 border border-slate-700 text-slate-300 font-semibold text-sm hover:bg-slate-700 active:scale-95 transition flex items-center justify-center gap-2">
         <i class="fa-solid fa-arrows-rotate"></i>
-        <span>Shuffle Cards</span>
+        <span data-i18n="shuffleBtn">Xáo lại thẻ</span>
       </button>
     </section>
 
     <!-- ==================== 4. MAGIC 8-BALL MODE ==================== -->
     <section id="view-magic8" class="view-section hidden w-full max-w-sm flex flex-col items-center justify-center space-y-6">
       <div class="text-center space-y-1">
-        <span class="px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs font-semibold uppercase tracking-wider">Magic 8-Ball</span>
-        <h2 class="text-xl font-display font-bold text-slate-100">Ask & Shake</h2>
+        <span data-i18n="magic8Badge" class="px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs font-semibold uppercase tracking-wider">Quả Cầu Ma Thuật</span>
+        <h2 data-i18n="magic8Title" class="text-xl font-display font-bold text-slate-100">Hỏi & Lắc Cầu</h2>
       </div>
 
       <!-- 8-Ball Sphere Container -->
@@ -262,8 +270,8 @@
           <!-- Answer Liquid Triangle (Revealed on shake) -->
           <div id="ball-answer-triangle" class="hidden animate-float flex flex-col items-center justify-center text-center">
             <div class="w-0 h-0 border-l-[45px] border-l-transparent border-r-[45px] border-r-transparent border-b-[75px] border-b-indigo-600/90 drop-shadow-[0_0_12px_rgba(99,102,241,0.8)] flex items-center justify-center relative">
-              <span id="magic8-text" class="absolute top-8 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 text-[9px] font-bold text-indigo-100 uppercase leading-tight tracking-tighter text-center">
-                Ask a Question
+              <span id="magic8-text" data-i18n="magic8Default" class="absolute top-8 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 text-[9px] font-bold text-indigo-100 uppercase leading-tight tracking-tighter text-center">
+                Hãy Đặt Câu Hỏi
               </span>
             </div>
           </div>
@@ -271,11 +279,11 @@
         </div>
       </div>
 
-      <p class="text-xs text-slate-400 text-center italic">Think of a Yes/No question and tap or shake the ball!</p>
+      <p data-i18n="magic8Hint" class="text-xs text-slate-400 text-center italic">Nghĩ về câu hỏi Có/Không rồi chạm hoặc lắc quả cầu!</p>
 
       <button id="ask-8ball-btn" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 text-white font-display font-bold text-base shadow-lg shadow-pink-500/25 active:scale-95 transition flex items-center justify-center gap-2">
         <i class="fa-solid fa-wand-magic-sparkles"></i>
-        <span>Consult 8-Ball</span>
+        <span data-i18n="ask8BallBtn">Xin Quẻ Ma Thuật</span>
       </button>
     </section>
 
@@ -289,16 +297,16 @@
       </div>
       
       <div>
-        <span id="result-subtitle" class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Winning Decision</span>
-        <h3 id="result-title" class="text-2xl font-display font-extrabold text-slate-100 mt-1 break-words">Option 1</h3>
+        <span id="result-subtitle" class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Kết quả chọn lựa</span>
+        <h3 id="result-title" class="text-2xl font-display font-extrabold text-slate-100 mt-1 break-words">Lựa chọn 1</h3>
       </div>
 
       <div class="flex gap-2 pt-2">
         <button id="share-result-btn" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 transition flex items-center justify-center gap-1.5">
-          <i class="fa-solid fa-share-nodes"></i> Share
+          <i class="fa-solid fa-share-nodes"></i> <span data-i18n="shareBtn">Chia sẻ</span>
         </button>
-        <button id="close-modal-btn" class="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-500 transition shadow-lg shadow-indigo-600/30">
-          Continue
+        <button id="close-modal-btn" data-i18n="continueBtn" class="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-500 transition shadow-lg shadow-indigo-600/30">
+          Tiếp tục
         </button>
       </div>
     </div>
@@ -312,7 +320,7 @@
       <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto -mt-2"></div>
 
       <div class="flex items-center justify-between">
-        <h3 class="font-display font-bold text-lg text-slate-100">Option Lists</h3>
+        <h3 data-i18n="drawerTitle" class="font-display font-bold text-lg text-slate-100">Danh Sách Lựa Chọn</h3>
         <button id="close-drawer-btn" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center hover:text-white">
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -320,9 +328,9 @@
 
       <!-- Add New Item Input -->
       <form id="add-item-form" class="flex gap-2">
-        <input type="text" id="new-item-input" placeholder="Add custom option..." class="flex-1 bg-slate-800 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
-        <button type="submit" class="px-4 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-500 transition shrink-0">
-          Add
+        <input type="text" id="new-item-input" data-i18n-placeholder="itemPlaceholder" placeholder="Thêm tùy chọn mới..." class="flex-1 bg-slate-800 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
+        <button type="submit" data-i18n="addBtn" class="px-4 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-500 transition shrink-0">
+          Thêm
         </button>
       </form>
 
@@ -333,11 +341,11 @@
 
       <!-- Preset Lists Quick Picker -->
       <div class="space-y-2 pt-2 border-t border-slate-800">
-        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Quick Presets</span>
+        <span data-i18n="presetsHeader" class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Mẫu Có Sẵn</span>
         <div class="flex gap-2 overflow-x-auto pb-1" id="presets-chips">
-          <button data-preset="food" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 text-xs shrink-0 hover:border-indigo-500 transition">🍔 Lunch Ideas</button>
-          <button data-preset="numbers" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 text-xs shrink-0 hover:border-indigo-500 transition">🎲 1 to 6</button>
-          <button data-preset="truth" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 text-xs shrink-0 hover:border-indigo-500 transition">🔥 Truth or Dare</button>
+          <button data-preset="food" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 text-xs shrink-0 hover:border-indigo-500 transition">🍔 <span data-i18n="presetFood">Món Ăn</span></button>
+          <button data-preset="numbers" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 text-xs shrink-0 hover:border-indigo-500 transition">🎲 <span data-i18n="presetNumbers">Số 1 đến 6</span></button>
+          <button data-preset="truth" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 text-xs shrink-0 hover:border-indigo-500 transition">🔥 <span data-i18n="presetTruth">Thật hay Thách</span></button>
         </div>
       </div>
 
@@ -350,56 +358,198 @@
       
       <button data-target="view-wheel" class="nav-tab active flex flex-col items-center py-2 px-1 rounded-xl text-indigo-400 transition">
         <i class="fa-solid fa-pie-chart text-lg mb-0.5"></i>
-        <span class="text-[10px] font-semibold">Wheel</span>
+        <span data-i18n="tabWheel" class="text-[10px] font-semibold">Vòng Quay</span>
       </button>
 
       <button data-target="view-coin" class="nav-tab flex flex-col items-center py-2 px-1 rounded-xl text-slate-400 hover:text-slate-200 transition">
         <i class="fa-solid fa-coins text-lg mb-0.5"></i>
-        <span class="text-[10px] font-semibold">Coin</span>
+        <span data-i18n="tabCoin" class="text-[10px] font-semibold">Đồng Xu</span>
       </button>
 
       <button data-target="view-cards" class="nav-tab flex flex-col items-center py-2 px-1 rounded-xl text-slate-400 hover:text-slate-200 transition">
         <i class="fa-solid fa-box-open text-lg mb-0.5"></i>
-        <span class="text-[10px] font-semibold">Blind Box</span>
+        <span data-i18n="tabCards" class="text-[10px] font-semibold">Rút Thẻ</span>
       </button>
 
       <button data-target="view-magic8" class="nav-tab flex flex-col items-center py-2 px-1 rounded-xl text-slate-400 hover:text-slate-200 transition">
         <i class="fa-solid fa-8 text-lg mb-0.5"></i>
-        <span class="text-[10px] font-semibold">8-Ball</span>
+        <span data-i18n="tab8Ball" class="text-[10px] font-semibold">Quả Cầu</span>
       </button>
 
     </div>
   </nav>
 
   <script>
-    // State Management
-    const defaultPresets = {
-      food: ["Pizza 🍕", "Sushi 🍣", "Burgers 🍔", "Tacos 🌮", "Pho 🍲", "Salad 🥗"],
-      numbers: ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 6"],
-      truth: ["Tell a Secret 🤫", "Do 10 Pushups 💪", "Sing a Song 🎤", "Funny Face 🤪", "Call a Friend 📞"]
+    /* ==========================================================================
+       BILINGUAL DICTIONARY (VIETNAMESE DEFAULT & ENGLISH)
+       ========================================================================== */
+    const translations = {
+      vi: {
+        subTitle: "Studio Di Động",
+        wheelBadge: "Vòng Quay May Mắn",
+        wheelTitle: "Quay Để Quyết Định",
+        spinBtn: "QUAY",
+        editItems: "Chỉnh sửa",
+        coinBadge: "Tung Đồng Xu 3D",
+        coinTitle: "Mặt Ngửa hay Mặt Sấp?",
+        coinHeads: "NGỬA",
+        coinTails: "SẤP",
+        flipCoinBtn: "Chạm để tung đồng xu",
+        cardsBadge: "Hộp Quà Bí Ẩn",
+        cardsTitle: "Rút Thẻ May Mắn",
+        shuffleBtn: "Xáo lại thẻ",
+        magic8Badge: "Quả Cầu Ma Thuật",
+        magic8Title: "Hỏi & Lắc Cầu",
+        magic8Default: "Hãy Đặt Câu Hỏi",
+        magic8Hint: "Nghĩ về câu hỏi Có/Không rồi chạm hoặc lắc quả cầu!",
+        ask8BallBtn: "Xin Quẻ Ma Thuật",
+        shareBtn: "Chia sẻ",
+        continueBtn: "Tiếp tục",
+        drawerTitle: "Danh Sách Lựa Chọn",
+        itemPlaceholder: "Thêm tùy chọn mới...",
+        addBtn: "Thêm",
+        presetsHeader: "Mẫu Có Sẵn",
+        presetFood: "Món Ăn",
+        presetNumbers: "Số 1 đến 6",
+        presetTruth: "Thật hay Thách",
+        tabWheel: "Vòng Quay",
+        tabCoin: "Đồng Xu",
+        tabCards: "Rút Thẻ",
+        tab8Ball: "Quả Cầu",
+        customItemsSuffix: "Lựa chọn tùy chỉnh",
+        wheelWinner: "Kết Quả Vòng Quay",
+        coinResult: "Kết Quả Đồng Xu",
+        cardRevealed: "Thẻ Đã Rút",
+        headsResult: "MẶT NGỬA 👑",
+        tailsResult: "MẶT SẤP 🛡️",
+        shareSuccess: "Đã sao chép kết quả vào clipboard!",
+      },
+      en: {
+        subTitle: "Mobile Studio",
+        wheelBadge: "Wheel of Fortune",
+        wheelTitle: "Spin to Decide",
+        spinBtn: "SPIN",
+        editItems: "Edit Items",
+        coinBadge: "3D Coin Flip",
+        coinTitle: "Heads or Tails?",
+        coinHeads: "HEADS",
+        coinTails: "TAILS",
+        flipCoinBtn: "Tap to Flip Coin",
+        cardsBadge: "Blind Box Cards",
+        cardsTitle: "Pick Your Destiny",
+        shuffleBtn: "Shuffle Cards",
+        magic8Badge: "Magic 8-Ball",
+        magic8Title: "Ask & Shake",
+        magic8Default: "Ask a Question",
+        magic8Hint: "Think of a Yes/No question and tap or shake the ball!",
+        ask8BallBtn: "Consult 8-Ball",
+        shareBtn: "Share",
+        continueBtn: "Continue",
+        drawerTitle: "Option Lists",
+        itemPlaceholder: "Add custom option...",
+        addBtn: "Add",
+        presetsHeader: "Quick Presets",
+        presetFood: "Lunch Ideas",
+        presetNumbers: "1 to 6",
+        presetTruth: "Truth or Dare",
+        tabWheel: "Wheel",
+        tabCoin: "Coin",
+        tabCards: "Blind Box",
+        tab8Ball: "8-Ball",
+        customItemsSuffix: "Custom Items",
+        wheelWinner: "Wheel Winner",
+        coinResult: "Coin Result",
+        cardRevealed: "Card Revealed",
+        headsResult: "HEADS 👑",
+        tailsResult: "TAILS 🛡️",
+        shareSuccess: "Result copied to clipboard!",
+      }
     };
 
+    const defaultPresets = {
+      vi: {
+        food: ["Phở Bò 🍲", "Cơm Tấm 🍛", "Bún Chả 🥗", "Bánh Mỳ 🥖", "Lẩu Thái 🥘", "Trà Sữa 🧋"],
+        numbers: ["Lựa chọn 1", "Lựa chọn 2", "Lựa chọn 3", "Lựa chọn 4", "Lựa chọn 5", "Lựa chọn 6"],
+        truth: ["Kể một bí mật 🤫", "Chống đẩy 10 cái 💪", "Hát một bài 🎤", "Làm mặt hề 🤪", "Gọi điện cho bạn 📞"]
+      },
+      en: {
+        food: ["Pizza 🍕", "Sushi 🍣", "Burgers 🍔", "Tacos 🌮", "Pho 🍲", "Salad 🥗"],
+        numbers: ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 6"],
+        truth: ["Tell a Secret 🤫", "Do 10 Pushups 💪", "Sing a Song 🎤", "Funny Face 🤪", "Call a Friend 📞"]
+      }
+    };
+
+    const magic8Answers = {
+      vi: [
+        "Chắc chắn rồi!", "Không còn nghi ngờ gì", "Tin tưởng vào điều đó",
+        "Rất có khả năng", "Theo tôi thì là CÓ", "Tương lai rất sáng",
+        "Mờ ảo quá, hỏi lại sau", "Hãy tập trung hỏi lại", "Tốt nhất chưa nên nói",
+        "Đừng trông chờ vào nó", "Câu trả lời là KHÔNG", "Nguồn tin nói KHÔNG", "Rất đáng nghi ngờ"
+      ],
+      en: [
+        "It is certain", "Without a doubt", "You may rely on it",
+        "Yes definitely", "As I see it, yes", "Most likely",
+        "Reply hazy, try again", "Ask again later", "Better not tell you now",
+        "Don't count on it", "My reply is no", "My sources say no", "Very doubtful"
+      ]
+    };
+
+    // Global State
     let state = {
-      activeList: JSON.parse(localStorage.getItem('qd_active_list')) || defaultPresets.food,
+      lang: localStorage.getItem('qd_lang') || 'vi', // Default to Vietnamese
+      activeList: JSON.parse(localStorage.getItem('qd_active_list')) || null,
       soundEnabled: JSON.parse(localStorage.getItem('qd_sound')) ?? true,
       darkMode: JSON.parse(localStorage.getItem('qd_dark')) ?? true,
       isSpinning: false,
       currentView: 'view-wheel'
     };
 
-    // Color palette for Wheel
+    if (!state.activeList) {
+      state.activeList = defaultPresets[state.lang].food;
+    }
+
     const sliceColors = [
       '#6366f1', '#a855f7', '#ec4899', '#f43f5e', 
       '#10b981', '#06b6d4', '#f59e0b', '#8b5cf6'
     ];
 
-    // Magic 8-Ball Answers
-    const magic8Answers = [
-      "It is certain", "Without a doubt", "You may rely on it",
-      "Yes definitely", "As I see it, yes", "Most likely",
-      "Reply hazy, try again", "Ask again later", "Better not tell you now",
-      "Don't count on it", "My reply is no", "My sources say no", "Very doubtful"
-    ];
+    /* ==========================================================================
+       LANGUAGE TOGGLE LOGIC
+       ========================================================================== */
+    function setLanguage(lang) {
+      state.lang = lang;
+      localStorage.setItem('qd_lang', lang);
+      document.getElementById('lang-code-badge').innerText = lang.toUpperCase();
+
+      // Update static text elements
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (translations[lang][key]) {
+          el.innerText = translations[lang][key];
+        }
+      });
+
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.dataset.i18nPlaceholder;
+        if (translations[lang][key]) {
+          el.placeholder = translations[lang][key];
+        }
+      });
+
+      document.getElementById('app-subtitle-text').innerText = translations[lang].subTitle;
+
+      // Sync active list item label text
+      document.getElementById('active-list-name').innerText = `${state.activeList.length} ${translations[lang].customItemsSuffix}`;
+
+      // Redraw UI components with new language
+      drawWheel();
+      renderCards();
+    }
+
+    document.getElementById('lang-toggle').addEventListener('click', () => {
+      const newLang = state.lang === 'vi' ? 'en' : 'vi';
+      setLanguage(newLang);
+    });
 
     // Simulated Haptic Visual Touch Feedback
     function triggerHapticVisual(e) {
@@ -495,7 +645,7 @@
       const index = Math.floor((360 - (degrees % 360)) / arcd) % numOptions;
 
       const winner = state.activeList[index];
-      showResultModal('Wheel Winner', winner);
+      showResultModal(translations[state.lang].wheelWinner, winner);
     }
 
     function easeOut(t, b, c, d) {
@@ -533,7 +683,8 @@
 
       setTimeout(() => {
         state.isSpinning = false;
-        showResultModal('Coin Result', isHeads ? 'HEADS 👑' : 'TAILS 🛡️');
+        const winnerText = isHeads ? translations[state.lang].headsResult : translations[state.lang].tailsResult;
+        showResultModal(translations[state.lang].coinResult, winnerText);
       }, 800);
     }
 
@@ -569,7 +720,7 @@
           if (card.classList.contains('card-flipped')) return;
           card.classList.add('card-flipped');
           setTimeout(() => {
-            showResultModal('Card Revealed', item);
+            showResultModal(translations[state.lang].cardRevealed, item);
           }, 400);
         });
 
@@ -591,13 +742,13 @@
       if (state.isSpinning) return;
       state.isSpinning = true;
 
-      // Shake animation
       ballContainer.classList.add('animate-bounce-short');
       ball8Num.classList.add('hidden');
       ballAnswer.classList.add('hidden');
 
       setTimeout(() => {
-        const randomAnswer = magic8Answers[Math.floor(Math.random() * magic8Answers.length)];
+        const pool = magic8Answers[state.lang];
+        const randomAnswer = pool[Math.floor(Math.random() * pool.length)];
         magic8Text.innerText = randomAnswer;
         ballAnswer.classList.remove('hidden');
         ballContainer.classList.remove('animate-bounce-short');
@@ -624,7 +775,6 @@
       resultBox.classList.remove('scale-90');
       resultBox.classList.add('scale-100');
 
-      // Trigger Confetti
       confetti({
         particleCount: 70,
         spread: 60,
@@ -641,14 +791,14 @@
     document.getElementById('share-result-btn').addEventListener('click', async () => {
       const shareData = {
         title: 'QuickDecision Result',
-        text: `My decision is: ${resultTitle.innerText}! Decided using QuickDecision Hub.`,
+        text: `${translations[state.lang].wheelWinner}: ${resultTitle.innerText}! (QuickDecision Hub)`,
         url: window.location.href,
       };
       if (navigator.share) {
         try { await navigator.share(shareData); } catch (e) {}
       } else {
         navigator.clipboard.writeText(shareData.text);
-        alert('Result copied to clipboard!');
+        alert(translations[state.lang].shareSuccess);
       }
     });
 
@@ -711,7 +861,7 @@
     document.querySelectorAll('[data-preset]').forEach(chip => {
       chip.addEventListener('click', (e) => {
         const key = e.currentTarget.dataset.preset;
-        state.activeList = [...defaultPresets[key]];
+        state.activeList = [...defaultPresets[state.lang][key]];
         saveAndSyncList();
       });
     });
@@ -721,7 +871,7 @@
       renderActiveItems();
       drawWheel();
       renderCards();
-      document.getElementById('active-list-name').innerText = `${state.activeList.length} Custom Items`;
+      document.getElementById('active-list-name').innerText = `${state.activeList.length} ${translations[state.lang].customItemsSuffix}`;
     }
 
     /* ==========================================================================
@@ -776,9 +926,8 @@
       localStorage.setItem('qd_sound', JSON.stringify(state.soundEnabled));
     });
 
-    // Initial Setup
-    drawWheel();
-    renderCards();
+    // Initial Language Setup
+    setLanguage(state.lang);
   </script>
 </body>
 </html>
