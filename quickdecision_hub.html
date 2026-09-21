@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>QuickDecision Hub</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          },
+          animation: {
+            'bounce-short': 'bounce 0.5s ease-in-out 1',
+            'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 3s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Prevent text selection & blue tap highlight on mobile */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    body {
+      touch-action: manipulation;
+      overflow-x: hidden;
+    }
+
+    /* Custom Scrollbar for list drawers */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.3);
+      border-radius: 9999px;
+    }
+
+    /* 3D Coin Flip Properties */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .transform-style-3d {
+      transform-style: preserve-3d;
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+
+    /* Card Flip Effects */
+    .card-inner {
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    .card-flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    /* Simulated Sound / Haptic Visual Waves */
+    @keyframes ripple {
+      0% { transform: scale(0.8); opacity: 0.8; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .haptic-ring {
+      position: absolute;
+      border: 2px solid rgba(99, 102, 241, 0.5);
+      border-radius: 50%;
+      animation: ripple 0.4s ease-out forwards;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col justify-between transition-colors duration-300">
+
+  <!-- App Header -->
+  <header class="sticky top-0 z-30 bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-800/80 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-2.5">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
+        <i class="fa-solid fa-dice-d20 text-lg"></i>
+      </div>
+      <div>
+        <h1 class="font-display font-extrabold text-base tracking-tight bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
+          QuickDecision
+        </h1>
+        <p class="text-[10px] text-slate-400 font-medium -mt-1">Mobile Studio</p>
+      </div>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="flex items-center space-x-2">
+      <!-- Sound Toggle visual feedback indicator -->
+      <button id="sound-toggle" class="w-9 h-9 rounded-xl bg-slate-800 text-slate-300 border border-slate-700/60 flex items-center justify-center hover:bg-slate-700 transition active:scale-95" title="Toggle Sound Visuals">
+        <i id="sound-icon" class="fa-solid fa-volume-high text-xs text-indigo-400"></i>
+      </button>
+
+      <!-- Theme Toggle -->
+      <button id="theme-toggle" class="w-9 h-9 rounded-xl bg-slate-800 text-slate-300 border border-slate-700/60 flex items-center justify-center hover:bg-slate-700 transition active:scale-95">
+        <i id="theme-icon" class="fa-solid fa-moon text-xs"></i>
+      </button>
+
+      <!-- Manage Options Drawer Toggle -->
+      <button id="open-lists-btn" class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30 transition active:scale-95">
+        <i class="fa-solid fa-list-check text-xs"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main id="app-container" class="flex-1 relative overflow-hidden flex flex-col justify-center items-center p-4">
+
+    <!-- ==================== 1. WHEEL OF FORTUNE MODE ==================== -->
+    <section id="view-wheel" class="view-section w-full max-w-sm flex flex-col items-center justify-center space-y-6">
+      <div class="text-center space-y-1">
+        <span class="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-wider">Wheel of Fortune</span>
+        <h2 class="text-xl font-display font-bold text-slate-100">Spin to Decide</h2>
+      </div>
+
+      <!-- Wheel Container -->
+      <div class="relative w-72 h-72 sm:w-80 sm:h-80 flex items-center justify-center">
+        <!-- Pointer Indicator -->
+        <div class="absolute -top-3 z-20 text-amber-400 drop-shadow-[0_4px_10px_rgba(245,158,11,0.5)]">
+          <i class="fa-solid fa-caret-down text-4xl"></i>
+        </div>
+
+        <!-- Wheel Canvas -->
+        <canvas id="wheel-canvas" width="320" height="320" class="w-full h-full rounded-full shadow-2xl border-4 border-slate-800/80 transition-transform"></canvas>
+
+        <!-- Center Spin Button -->
+        <button id="spin-btn" class="absolute z-10 w-16 h-16 rounded-full bg-slate-900 text-white font-display font-extrabold text-sm border-4 border-indigo-500 shadow-xl shadow-indigo-500/40 flex items-center justify-center hover:scale-105 active:scale-95 transition">
+          SPIN
+        </button>
+      </div>
+
+      <!-- Active List Banner -->
+      <div class="w-full bg-slate-800/60 border border-slate-700/60 rounded-2xl p-3 flex items-center justify-between">
+        <div class="flex items-center space-x-2.5 overflow-hidden">
+          <i class="fa-solid fa-tag text-indigo-400 text-sm"></i>
+          <span id="active-list-name" class="text-xs font-semibold text-slate-200 truncate">Default List</span>
+        </div>
+        <button id="quick-edit-btn" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium shrink-0 flex items-center gap-1">
+          <i class="fa-solid fa-pen text-[10px]"></i> Edit Items
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== 2. COIN FLIPPER 3D MODE ==================== -->
+    <section id="view-coin" class="view-section hidden w-full max-w-sm flex flex-col items-center justify-center space-y-8">
+      <div class="text-center space-y-1">
+        <span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">3D Coin Flip</span>
+        <h2 class="text-xl font-display font-bold text-slate-100">Heads or Tails?</h2>
+      </div>
+
+      <!-- 3D Coin Object -->
+      <div class="perspective-1000 w-48 h-48 sm:w-56 sm:h-56">
+        <div id="coin-object" class="w-full h-full relative transform-style-3d cursor-pointer transition-transform duration-700">
+          
+          <!-- Heads Front Side -->
+          <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-200 border-4 border-amber-300 shadow-2xl flex flex-col items-center justify-center text-amber-950 backface-hidden">
+            <div class="w-36 h-36 rounded-full border-2 border-dashed border-amber-700/40 flex flex-col items-center justify-center p-2 text-center">
+              <i class="fa-solid fa-crown text-4xl mb-1 text-amber-900"></i>
+              <span class="font-display font-black text-xl tracking-wider uppercase">HEADS</span>
+            </div>
+          </div>
+
+          <!-- Tails Back Side -->
+          <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-slate-400 via-slate-300 to-slate-100 border-4 border-slate-200 shadow-2xl flex flex-col items-center justify-center text-slate-800 backface-hidden rotate-y-180">
+            <div class="w-36 h-36 rounded-full border-2 border-dashed border-slate-400/60 flex flex-col items-center justify-center p-2 text-center">
+              <i class="fa-solid fa-shield-halved text-4xl mb-1 text-slate-700"></i>
+              <span class="font-display font-black text-xl tracking-wider uppercase">TAILS</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <button id="flip-coin-btn" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-display font-bold text-base shadow-lg shadow-emerald-500/25 active:scale-95 transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-hand-pointer"></i>
+        <span>Tap to Flip Coin</span>
+      </button>
+    </section>
+
+    <!-- ==================== 3. MYSTERY CARDS MODE ==================== -->
+    <section id="view-cards" class="view-section hidden w-full max-w-sm flex flex-col items-center justify-center space-y-6">
+      <div class="text-center space-y-1">
+        <span class="px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold uppercase tracking-wider">Blind Box Cards</span>
+        <h2 class="text-xl font-display font-bold text-slate-100">Pick Your Destiny</h2>
+      </div>
+
+      <!-- Grid of Cards -->
+      <div id="cards-grid" class="grid grid-cols-3 gap-3 w-full">
+        <!-- Generated by JavaScript -->
+      </div>
+
+      <button id="reset-cards-btn" class="w-full py-3 rounded-2xl bg-slate-800 border border-slate-700 text-slate-300 font-semibold text-sm hover:bg-slate-700 active:scale-95 transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-arrows-rotate"></i>
+        <span>Shuffle Cards</span>
+      </button>
+    </section>
+
+    <!-- ==================== 4. MAGIC 8-BALL MODE ==================== -->
+    <section id="view-magic8" class="view-section hidden w-full max-w-sm flex flex-col items-center justify-center space-y-6">
+      <div class="text-center space-y-1">
+        <span class="px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs font-semibold uppercase tracking-wider">Magic 8-Ball</span>
+        <h2 class="text-xl font-display font-bold text-slate-100">Ask & Shake</h2>
+      </div>
+
+      <!-- 8-Ball Sphere Container -->
+      <div id="ball-container" class="relative w-64 h-64 sm:w-72 sm:h-72 rounded-full bg-radial from-slate-800 via-slate-950 to-black border-4 border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex items-center justify-center cursor-pointer transition">
+        
+        <!-- Surface Gloss Reflection -->
+        <div class="absolute top-4 left-8 w-24 h-12 bg-white/10 rounded-full blur-md transform -rotate-45 pointer-events-none"></div>
+
+        <!-- Inner Window -->
+        <div class="w-32 h-32 rounded-full bg-slate-950 border-4 border-slate-900 shadow-inner flex items-center justify-center p-3 text-center overflow-hidden relative">
+          
+          <!-- Number 8 Side (Front default) -->
+          <div id="ball-number-8" class="w-16 h-16 rounded-full bg-white text-slate-950 font-display font-black text-3xl flex items-center justify-center shadow-lg">
+            8
+          </div>
+
+          <!-- Answer Liquid Triangle (Revealed on shake) -->
+          <div id="ball-answer-triangle" class="hidden animate-float flex flex-col items-center justify-center text-center">
+            <div class="w-0 h-0 border-l-[45px] border-l-transparent border-r-[45px] border-r-transparent border-b-[75px] border-b-indigo-600/90 drop-shadow-[0_0_12px_rgba(99,102,241,0.8)] flex items-center justify-center relative">
+              <span id="magic8-text" class="absolute top-8 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 text-[9px] font-bold text-indigo-100 uppercase leading-tight tracking-tighter text-center">
+                Ask a Question
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-400 text-center italic">Think of a Yes/No question and tap or shake the ball!</p>
+
+      <button id="ask-8ball-btn" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 text-white font-display font-bold text-base shadow-lg shadow-pink-500/25 active:scale-95 transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>Consult 8-Ball</span>
+      </button>
+    </section>
+
+  </main>
+
+  <!-- Result Pop-up Modal -->
+  <div id="result-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="w-full max-w-xs bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl text-center transform scale-90 transition-transform duration-300 space-y-4" id="result-modal-box">
+      <div id="result-icon-bg" class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white text-2xl shadow-xl shadow-indigo-500/30">
+        <i class="fa-solid fa-trophy"></i>
+      </div>
+      
+      <div>
+        <span id="result-subtitle" class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Winning Decision</span>
+        <h3 id="result-title" class="text-2xl font-display font-extrabold text-slate-100 mt-1 break-words">Option 1</h3>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button id="share-result-btn" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-share-nodes"></i> Share
+        </button>
+        <button id="close-modal-btn" class="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-500 transition shadow-lg shadow-indigo-600/30">
+          Continue
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manage Lists Bottom Drawer Sheet -->
+  <div id="list-drawer" class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 flex flex-col justify-end">
+    <div id="drawer-panel" class="w-full bg-slate-900 border-t border-slate-800 rounded-t-3xl p-5 max-h-[85vh] flex flex-col space-y-4 transform translate-y-full transition-transform duration-300 ease-out">
+      
+      <!-- Drawer Handlebar -->
+      <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto -mt-2"></div>
+
+      <div class="flex items-center justify-between">
+        <h3 class="font-display font-bold text-lg text-slate-100">Option Lists</h3>
+        <button id="close-drawer-btn" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center hover:text-white">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Add New Item Input -->
+      <form id="add-item-form" class="flex gap-2">
+        <input type="text" id="new-item-input" placeholder="Add custom option..." class="flex-1 bg-slate-800 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
+        <button type="submit" class="px-4 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-500 transition shrink-0">
+          Add
+        </button>
+      </form>
+
+      <!-- Active Items List -->
+      <div class="flex-1 overflow-y-auto space-y-2 max-h-48 pr-1" id="active-items-container">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Preset Lists Quick Picker -->
+      <div class="space-y-2 pt-2 border-t border-slate-800">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Quick Presets</span>
+        <div class="flex gap-2 overflow-x-auto pb-1" id="presets-chips">
+          <button data-preset="food" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 text-xs shrink-0 hover:border-indigo-500 transition">🍔 Lunch Ideas</button>
+          <button data-preset="numbers" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 text-xs shrink-0 hover:border-indigo-500 transition">🎲 1 to 6</button>
+          <button data-preset="truth" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 text-xs shrink-0 hover:border-indigo-500 transition">🔥 Truth or Dare</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Tab Bar Navigation -->
+  <nav class="sticky bottom-0 z-30 bg-slate-900/90 border-t border-slate-800/80 px-3 py-2 backdrop-blur-lg">
+    <div class="grid grid-cols-4 gap-1">
+      
+      <button data-target="view-wheel" class="nav-tab active flex flex-col items-center py-2 px-1 rounded-xl text-indigo-400 transition">
+        <i class="fa-solid fa-pie-chart text-lg mb-0.5"></i>
+        <span class="text-[10px] font-semibold">Wheel</span>
+      </button>
+
+      <button data-target="view-coin" class="nav-tab flex flex-col items-center py-2 px-1 rounded-xl text-slate-400 hover:text-slate-200 transition">
+        <i class="fa-solid fa-coins text-lg mb-0.5"></i>
+        <span class="text-[10px] font-semibold">Coin</span>
+      </button>
+
+      <button data-target="view-cards" class="nav-tab flex flex-col items-center py-2 px-1 rounded-xl text-slate-400 hover:text-slate-200 transition">
+        <i class="fa-solid fa-box-open text-lg mb-0.5"></i>
+        <span class="text-[10px] font-semibold">Blind Box</span>
+      </button>
+
+      <button data-target="view-magic8" class="nav-tab flex flex-col items-center py-2 px-1 rounded-xl text-slate-400 hover:text-slate-200 transition">
+        <i class="fa-solid fa-8 text-lg mb-0.5"></i>
+        <span class="text-[10px] font-semibold">8-Ball</span>
+      </button>
+
+    </div>
+  </nav>
+
+  <script>
+    // State Management
+    const defaultPresets = {
+      food: ["Pizza 🍕", "Sushi 🍣", "Burgers 🍔", "Tacos 🌮", "Pho 🍲", "Salad 🥗"],
+      numbers: ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 6"],
+      truth: ["Tell a Secret 🤫", "Do 10 Pushups 💪", "Sing a Song 🎤", "Funny Face 🤪", "Call a Friend 📞"]
+    };
+
+    let state = {
+      activeList: JSON.parse(localStorage.getItem('qd_active_list')) || defaultPresets.food,
+      soundEnabled: JSON.parse(localStorage.getItem('qd_sound')) ?? true,
+      darkMode: JSON.parse(localStorage.getItem('qd_dark')) ?? true,
+      isSpinning: false,
+      currentView: 'view-wheel'
+    };
+
+    // Color palette for Wheel
+    const sliceColors = [
+      '#6366f1', '#a855f7', '#ec4899', '#f43f5e', 
+      '#10b981', '#06b6d4', '#f59e0b', '#8b5cf6'
+    ];
+
+    // Magic 8-Ball Answers
+    const magic8Answers = [
+      "It is certain", "Without a doubt", "You may rely on it",
+      "Yes definitely", "As I see it, yes", "Most likely",
+      "Reply hazy, try again", "Ask again later", "Better not tell you now",
+      "Don't count on it", "My reply is no", "My sources say no", "Very doubtful"
+    ];
+
+    // Simulated Haptic Visual Touch Feedback
+    function triggerHapticVisual(e) {
+      if (!state.soundEnabled) return;
+      
+      const ring = document.createElement('div');
+      ring.className = 'haptic-ring';
+      const size = 50;
+      const x = (e.clientX || (e.touches && e.touches[0].clientX) || window.innerWidth / 2) - size / 2;
+      const y = (e.clientY || (e.touches && e.touches[0].clientY) || window.innerHeight / 2) - size / 2;
+
+      ring.style.width = `${size}px`;
+      ring.style.height = `${size}px`;
+      ring.style.left = `${x}px`;
+      ring.style.top = `${y}px`;
+
+      document.body.appendChild(ring);
+      setTimeout(() => ring.remove(), 400);
+    }
+
+    document.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('button, .cursor-pointer')) {
+        triggerHapticVisual(e);
+      }
+    });
+
+    /* ==========================================================================
+       1. WHEEL OF FORTUNE CANVAS RENDERER & PHYSICS
+       ========================================================================== */
+    const canvas = document.getElementById('wheel-canvas');
+    const ctx = canvas.getContext('2d');
+    let startAngle = 0;
+
+    function drawWheel() {
+      const numOptions = state.activeList.length;
+      if (numOptions === 0) return;
+
+      const arcSize = (2 * Math.PI) / numOptions;
+      const radius = canvas.width / 2;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < numOptions; i++) {
+        const angle = startAngle + i * arcSize;
+        ctx.fillStyle = sliceColors[i % sliceColors.length];
+
+        ctx.beginPath();
+        ctx.arc(radius, radius, radius, angle, angle + arcSize, false);
+        ctx.lineTo(radius, radius);
+        ctx.fill();
+
+        // Draw Text Labels
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.translate(
+          radius + Math.cos(angle + arcSize / 2) * (radius * 0.65),
+          radius + Math.sin(angle + arcSize / 2) * (radius * 0.65)
+        );
+        ctx.rotate(angle + arcSize / 2 + Math.PI / 2);
+
+        const text = state.activeList[i];
+        ctx.font = 'bold 13px "Plus Jakarta Sans"';
+        ctx.textAlign = 'center';
+        ctx.fillText(text.length > 12 ? text.substring(0, 10) + '..' : text, 0, 0);
+        ctx.restore();
+      }
+    }
+
+    let spinTimeout = null;
+    let spinAngleStart = 0;
+    let spinTime = 0;
+    let spinTimeTotal = 0;
+
+    function rotateWheel() {
+      spinTime += 30;
+      if (spinTime >= spinTimeTotal) {
+        stopRotateWheel();
+        return;
+      }
+      const spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
+      startAngle += (spinAngle * Math.PI) / 180;
+      drawWheel();
+      spinTimeout = requestAnimationFrame(rotateWheel);
+    }
+
+    function stopRotateWheel() {
+      cancelAnimationFrame(spinTimeout);
+      state.isSpinning = false;
+
+      const numOptions = state.activeList.length;
+      const degrees = (startAngle * 180) / Math.PI + 90;
+      const arcd = 360 / numOptions;
+      const index = Math.floor((360 - (degrees % 360)) / arcd) % numOptions;
+
+      const winner = state.activeList[index];
+      showResultModal('Wheel Winner', winner);
+    }
+
+    function easeOut(t, b, c, d) {
+      const ts = (t /= d) * t;
+      const tc = ts * t;
+      return b + c * (tc + -3 * ts + 3 * t);
+    }
+
+    document.getElementById('spin-btn').addEventListener('click', () => {
+      if (state.isSpinning || state.activeList.length === 0) return;
+      state.isSpinning = true;
+
+      spinAngleStart = Math.random() * 20 + 20;
+      spinTime = 0;
+      spinTimeTotal = Math.random() * 2000 + 3000;
+      rotateWheel();
+    });
+
+    /* ==========================================================================
+       2. COIN FLIPPER 3D
+       ========================================================================== */
+    const coinObject = document.getElementById('coin-object');
+    let currentRotation = 0;
+
+    function flipCoin() {
+      if (state.isSpinning) return;
+      state.isSpinning = true;
+
+      const isHeads = Math.random() < 0.5;
+      const extraFlips = (Math.floor(Math.random() * 5) + 5) * 360;
+      const targetRotation = isHeads ? extraFlips : extraFlips + 180;
+
+      currentRotation += targetRotation;
+      coinObject.style.transform = `rotateY(${currentRotation}deg)`;
+
+      setTimeout(() => {
+        state.isSpinning = false;
+        showResultModal('Coin Result', isHeads ? 'HEADS 👑' : 'TAILS 🛡️');
+      }, 800);
+    }
+
+    document.getElementById('flip-coin-btn').addEventListener('click', flipCoin);
+    coinObject.addEventListener('click', flipCoin);
+
+    /* ==========================================================================
+       3. MYSTERY BLIND BOX CARDS
+       ========================================================================== */
+    const cardsGrid = document.getElementById('cards-grid');
+
+    function renderCards() {
+      cardsGrid.innerHTML = '';
+      const shuffled = [...state.activeList].sort(() => Math.random() - 0.5).slice(0, 6);
+
+      shuffled.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'card-item perspective-1000 h-28 cursor-pointer';
+        card.innerHTML = `
+          <div class="card-inner w-full h-full relative rounded-2xl shadow-md border border-slate-700/60">
+            <!-- Front (Cover) -->
+            <div class="absolute inset-0 rounded-2xl bg-gradient-to-tr from-purple-900 to-indigo-800 flex items-center justify-center text-white font-display font-bold text-lg backface-hidden">
+              <i class="fa-solid fa-question text-purple-300"></i>
+            </div>
+            <!-- Back (Revealed) -->
+            <div class="absolute inset-0 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-900 border border-purple-500/40 p-2 flex items-center justify-center text-center text-slate-100 font-semibold text-xs backface-hidden rotate-y-180 break-words">
+              ${item}
+            </div>
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          if (card.classList.contains('card-flipped')) return;
+          card.classList.add('card-flipped');
+          setTimeout(() => {
+            showResultModal('Card Revealed', item);
+          }, 400);
+        });
+
+        cardsGrid.appendChild(card);
+      });
+    }
+
+    document.getElementById('reset-cards-btn').addEventListener('click', renderCards);
+
+    /* ==========================================================================
+       4. MAGIC 8-BALL
+       ========================================================================== */
+    const ballContainer = document.getElementById('ball-container');
+    const ball8Num = document.getElementById('ball-number-8');
+    const ballAnswer = document.getElementById('ball-answer-triangle');
+    const magic8Text = document.getElementById('magic8-text');
+
+    function askMagic8Ball() {
+      if (state.isSpinning) return;
+      state.isSpinning = true;
+
+      // Shake animation
+      ballContainer.classList.add('animate-bounce-short');
+      ball8Num.classList.add('hidden');
+      ballAnswer.classList.add('hidden');
+
+      setTimeout(() => {
+        const randomAnswer = magic8Answers[Math.floor(Math.random() * magic8Answers.length)];
+        magic8Text.innerText = randomAnswer;
+        ballAnswer.classList.remove('hidden');
+        ballContainer.classList.remove('animate-bounce-short');
+        state.isSpinning = false;
+      }, 600);
+    }
+
+    document.getElementById('ask-8ball-btn').addEventListener('click', askMagic8Ball);
+    ballContainer.addEventListener('click', askMagic8Ball);
+
+    /* ==========================================================================
+       RESULTS MODAL & CONFETTI
+       ========================================================================== */
+    const resultModal = document.getElementById('result-modal');
+    const resultBox = document.getElementById('result-modal-box');
+    const resultTitle = document.getElementById('result-title');
+    const resultSubtitle = document.getElementById('result-subtitle');
+
+    function showResultModal(subtitle, winnerText) {
+      resultSubtitle.innerText = subtitle;
+      resultTitle.innerText = winnerText;
+
+      resultModal.classList.remove('opacity-0', 'pointer-events-none');
+      resultBox.classList.remove('scale-90');
+      resultBox.classList.add('scale-100');
+
+      // Trigger Confetti
+      confetti({
+        particleCount: 70,
+        spread: 60,
+        origin: { y: 0.6 }
+      });
+    }
+
+    document.getElementById('close-modal-btn').addEventListener('click', () => {
+      resultModal.classList.add('opacity-0', 'pointer-events-none');
+      resultBox.classList.remove('scale-100');
+      resultBox.classList.add('scale-90');
+    });
+
+    document.getElementById('share-result-btn').addEventListener('click', async () => {
+      const shareData = {
+        title: 'QuickDecision Result',
+        text: `My decision is: ${resultTitle.innerText}! Decided using QuickDecision Hub.`,
+        url: window.location.href,
+      };
+      if (navigator.share) {
+        try { await navigator.share(shareData); } catch (e) {}
+      } else {
+        navigator.clipboard.writeText(shareData.text);
+        alert('Result copied to clipboard!');
+      }
+    });
+
+    /* ==========================================================================
+       LIST DRAWER & LOCAL STORAGE MANAGEMENT
+       ========================================================================== */
+    const listDrawer = document.getElementById('list-drawer');
+    const drawerPanel = document.getElementById('drawer-panel');
+    const activeItemsContainer = document.getElementById('active-items-container');
+
+    function openDrawer() {
+      renderActiveItems();
+      listDrawer.classList.remove('opacity-0', 'pointer-events-none');
+      drawerPanel.classList.remove('translate-y-full');
+    }
+
+    function closeDrawer() {
+      listDrawer.classList.add('opacity-0', 'pointer-events-none');
+      drawerPanel.classList.add('translate-y-full');
+    }
+
+    document.getElementById('open-lists-btn').addEventListener('click', openDrawer);
+    document.getElementById('quick-edit-btn').addEventListener('click', openDrawer);
+    document.getElementById('close-drawer-btn').addEventListener('click', closeDrawer);
+
+    function renderActiveItems() {
+      activeItemsContainer.innerHTML = '';
+      state.activeList.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between bg-slate-800/80 border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-slate-200';
+        row.innerHTML = `
+          <span class="truncate">${item}</span>
+          <button data-index="${index}" class="delete-item-btn text-rose-400 hover:text-rose-300 p-1">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        `;
+        activeItemsContainer.appendChild(row);
+      });
+
+      document.querySelectorAll('.delete-item-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = parseInt(e.currentTarget.dataset.index);
+          state.activeList.splice(idx, 1);
+          saveAndSyncList();
+        });
+      });
+    }
+
+    document.getElementById('add-item-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('new-item-input');
+      const val = input.value.trim();
+      if (val) {
+        state.activeList.push(val);
+        input.value = '';
+        saveAndSyncList();
+      }
+    });
+
+    document.querySelectorAll('[data-preset]').forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        const key = e.currentTarget.dataset.preset;
+        state.activeList = [...defaultPresets[key]];
+        saveAndSyncList();
+      });
+    });
+
+    function saveAndSyncList() {
+      localStorage.setItem('qd_active_list', JSON.stringify(state.activeList));
+      renderActiveItems();
+      drawWheel();
+      renderCards();
+      document.getElementById('active-list-name').innerText = `${state.activeList.length} Custom Items`;
+    }
+
+    /* ==========================================================================
+       BOTTOM NAVIGATION & VIEW SWITCHER
+       ========================================================================== */
+    const navTabs = document.querySelectorAll('.nav-tab');
+    const views = document.querySelectorAll('.view-section');
+
+    navTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetViewId = tab.dataset.target;
+
+        navTabs.forEach(t => {
+          t.classList.remove('active', 'text-indigo-400');
+          t.classList.add('text-slate-400');
+        });
+
+        tab.classList.add('active', 'text-indigo-400');
+
+        views.forEach(v => {
+          if (v.id === targetViewId) {
+            v.classList.remove('hidden');
+          } else {
+            v.classList.add('hidden');
+          }
+        });
+
+        state.currentView = targetViewId;
+        if (targetViewId === 'view-cards') renderCards();
+      });
+    });
+
+    /* ==========================================================================
+       THEME & AUDIO SETTINGS
+       ========================================================================== */
+    const themeBtn = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+
+    themeBtn.addEventListener('click', () => {
+      state.darkMode = !state.darkMode;
+      document.documentElement.classList.toggle('dark', state.darkMode);
+      themeIcon.className = state.darkMode ? 'fa-solid fa-moon text-xs' : 'fa-solid fa-sun text-xs text-amber-400';
+      localStorage.setItem('qd_dark', JSON.stringify(state.darkMode));
+    });
+
+    const soundBtn = document.getElementById('sound-toggle');
+    const soundIcon = document.getElementById('sound-icon');
+
+    soundBtn.addEventListener('click', () => {
+      state.soundEnabled = !state.soundEnabled;
+      soundIcon.className = state.soundEnabled ? 'fa-solid fa-volume-high text-xs text-indigo-400' : 'fa-solid fa-volume-xmark text-xs text-slate-500';
+      localStorage.setItem('qd_sound', JSON.stringify(state.soundEnabled));
+    });
+
+    // Initial Setup
+    drawWheel();
+    renderCards();
+  </script>
+</body>
+</html>
